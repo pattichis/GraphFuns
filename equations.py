@@ -50,9 +50,15 @@ def plot_function_list(functions_list, x_values):
 
     # Clear layout
     fig.layout = {}
-    
+
+    # Initialize x-values
     x_values = np.array(x_values, dtype=float)
-    
+    x_min = min(x_values)
+    x_max = max(x_values)
+
+    # Initialize y range
+    y_min = 0
+    y_max = 0
     for func_name in functions_list:
         y_values = []
         
@@ -62,6 +68,31 @@ def plot_function_list(functions_list, x_values):
         y_values = np.array(y_values, dtype=float)
         
         fig.add_trace(go.Scatter(x = x_values, y = y_values, mode='lines+markers', name = str(func_name).replace('**', '^')) )
+
+        # Update y values:
+        y_min = min(y_min, min(y_values))
+        y_max = max(y_max, max(y_values))
+
+    
+    # Add y-axis
+    # fig.add_shape(
+    #    type="line",
+    #    x0=x_min,
+    #    x1=x_max,
+    #    y0=0,
+    #    y1=0,
+    #    line=dict(color="red", width=2)  # You can customize the line color and width
+    #    )
+    
+    # Add x-axis
+    # fig.add_shape(
+    #    type="line",
+    #    x0=0,
+    #    x1=0,
+    #    y0=y_min,
+    #    y1=y_max,
+    #    line=dict(color="red", width=2)  # You can customize the line color and width
+    #    )
     
     # Update the layout
     fig.update_layout(autosize = False)
