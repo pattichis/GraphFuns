@@ -15,7 +15,7 @@ class graph_funs:
     self.functions_names = []
 
     # Create an empty list of x-values:
-    self.x_values = []
+    self.domains = []
 
     # Create an empty list of vertical asymptotes:
     self.vertical_asymptotes = []
@@ -28,96 +28,121 @@ class graph_funs:
     if asymp_names is None:
       names = []
       for x in x_vals:
-        new_str = "x = "+x 
+        new_str = "x = "+str(x) 
         names.append(new_str)
-      self.vertical_asymptotes_names.append(names)
+      self.vertical_asymptotes_names.extend(names)
     else:
       self.vertical_asymptotes_names.extend(asymp_names)
 
-  def add_fun(self, f, f_name=None):
+  def add_fun(self, f, domain, f_name=None):
     """ adds a function to the current list.
     """
-    new_fun = f 
-    self.functions_list.append(new_fun)
+    self.functions_list.append(f)
+    self.domains.append(domain)
     if f_name is None:
-      self.functions_names.append(str(new_fun))
+      self.functions_names.append(str(f))
     else:
-      self.functions_names.append(f_name)
+      self.functions_names.append(f)
 
-  def add_funs(self, fun_list, fun_names_list=None):
+  def add_funs(self, fun_list, domain_list, fun_names_list=None):
     """ adds a list of functions to the current list.
     """
     self.functions_list.extend(fun_list)
+    self.domains.extend(domain_list)
     if fun_names_list is None:
       self.functions_names.extend(str(fun_list))
     else:
       self.functions_names.extend(fun_names_list)
 
-  def add_vert_translations(self, f, x_vals):
+  def add_vert_translations(self, f, domain, trans_range):
     """ adds vertical translations of f to list of functions.
     """
+    x_vals = np.linspace(*trans_range)
     for x_val in x_vals:
       new_fun = f + x_val
       self.functions_list.append(new_fun)
       self.functions_names.append(str(new_fun))
-    return new_fun 
+      self.domains.append(domain)
+    return 
 
-  def add_hor_translations(self, f, x_vals):
+  def add_hor_translations(self, f, domain, trans_range):
     """ adds horizontal translations of f to list of functions. """
     x = sp.symbols('x')
-    for x_val in x_vals:
+    min_x = domain[0]
+    max_x = domain[1]
+    num_of_points = domain[2]
+
+    for x_val in np.linspace(*trans_range):
       new_fun = f.subs(x, x-x_val)
       self.functions_list.append(new_fun)
       self.functions_names.append(str(new_fun))
-    return new_fun 
 
-  def add_refl_across_x(self, f, f_name=None):
+      new_domain = [min_x+x_val, max_x+x_val, num_of_points]
+      self.domains.append(new_domain)
+    return 
+
+  def add_refl_across_x(self, f, domain, f_name=None):
     """ adds a reflection of f across x to the functions list. """
     new_fun = -f
     self.functions_list.append(new_fun) 
+    self.domains.append(domain)
     if f_name is None:
       self.functions_names.append(str(new_fun))
     else:
       self.functions_names.append(f_name)
-    return new_fun 
+    return
 
-  def add_refl_across_y(self, f, f_name=None):
+  def add_refl_across_y(self, f, domain, f_name=None):
     """ adds a reflection of f across y to the functions list.
     """
     x = sp.symbols('x')
     new_fun = f.subs(x, -x)
+
+    min_x = domain[0]
+    max_x = domain[1]
+    num_of_points = domain[2]
+    new_domain = [-max_x, -min_x, num_of_points]
+    self.domains.append(new_domain)
+
     self.functions_list.append(new_fun) 
     if f_name is None:
       self.functions_names.append(str(new_fun))
     else:
       self.functions_names.append(f_name)
-    return new_fun 
+    return
 
-  def add_vert_dilations(self, exp_fun, a_values):
+  def add_vert_dilations(self, exp_fun, domain, a_range):
     """ adds vertical dilations of exponential functions to functions list. 
         This is done by multiplying by a.
     """
-    for a_val in a_values:
+    for a_val in np.linspace(*a_range):
       new_fun = a_val * exp_fun 
       self.functions_list.append(new_fun)
       self.functions_names.append(str(new_fun))
-    return new_fun 
+      self.domains.append(domain)
+    return 
 
-  def add_hor_dilations(self, f, x_scale_values):
+  def add_hor_dilations(self, f, domain, x_scale_range):
     """ adds horizontal dilations to functions list.
     """ 
     x = sp.symbols('x')
-    for x_scale in x_scale_values:
+    min_x = domain[0]
+    max_x = domain[1]
+    num_of_points = domain[2]
+
+    for x_scale in np.linspace(*x_scale_range):
       new_fun = f.subs(x, x_scale*x)
       self.functions_list.append(new_fun)
       self.functions_names.append(str(new_fun))
+
+      if (x_scale > 0):
+        new_domain = [x_scale*min_x, x_scale*max_x, num_of_points]
+      else:
+        new_domain = [x_scale*max_x, x_scale*min_x, num_of_points]
+      self.domains.append(new_domain)
     return new_fun 
 
-  def plot_fun(self, f, x_vals):
-    """ plots a single function. """
-    self.plot_function_list([f], x_vals)
-
-  def plot_functions_list(self, x_values, x_axis_name="x", y_axis_name="y", plot_title=" "):
+  def plot_funs(self, x_axis_name="x", y_axis_name="y", plot_title="Transformations"):
     """ plots a list of functions.
     """
     # Create the figure:
@@ -129,17 +154,15 @@ class graph_funs:
     # Clear layout
     fig.layout = {}
 
-    # Initialize x-values
-    self.x_values = np.array(x_values, dtype=float)
-
     # Initialize y range
     y_min = 0
     y_max = 0
     x = sp.symbols('x')
-    for func_name, str_name in zip(self.functions_list, self.functions_names):
+    for func_name, str_name, domain in zip(self.functions_list, self.functions_names, self.domains):
         # Generate the y-values
         y_values = []
-        for val in self.x_values:
+        x_values = np.linspace(*domain) # Unpack the list of elements.
+        for val in x_values:
           y_values.append(func_name.subs(x, val))
         y_values = np.array(y_values, dtype=float)
         
@@ -190,7 +213,8 @@ class graph_funs:
 
   def __repr__(self) -> str:
     str_rep =  "graph_funs class parameters.\n"  
-    str_rep += "x_values = "+str(self.x_values)+"\n"
+    str_rep += "Domains: \n"
+    str_rep += str(self.domains)+"\n"
     str_rep += "Function names: \n"
     str_rep += str(self.functions_names)+"\n"
     str_rep += "Vertical asymptotes:\n"
