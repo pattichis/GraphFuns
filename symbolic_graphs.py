@@ -135,11 +135,14 @@ class graph_funs:
       self.functions_list.append(new_fun)
       self.functions_names.append(str(new_fun))
 
-      if (x_scale > 0):
-        new_domain = [x_scale*min_x, x_scale*max_x, num_of_points]
-      else:
-        new_domain = [x_scale*max_x, x_scale*min_x, num_of_points]
-      self.domains.append(new_domain)
+      # Keep the same domain
+      self.domains.append(domain)
+
+      # if (x_scale > 0):
+      #   new_domain = [x_scale*min_x, x_scale*max_x, num_of_points]
+      # else:
+      #   new_domain = [x_scale*max_x, x_scale*min_x, num_of_points]
+      # self.domains.append(new_domain)
     return new_fun 
 
   def plot_funs(self, x_axis_name="x", y_axis_name="y", plot_title="Transformations"):
