@@ -283,14 +283,18 @@ class graph_funs:
     return new_funs, new_domains
 
 
-  def add_vert_dilation(self, exp_fun, domain, a_val, color=None):
+  def add_vert_dilation(self, exp_fun, domain, a_val, f_name=None, color=None):
     """ adds vertical dilations of exponential functions to functions list. 
         This is done by multiplying by a.
     """
     new_fun = a_val * exp_fun 
     self.functions_list.append(new_fun)
-    self.functions_names.append(str(new_fun))
     self.domains.append(domain)
+
+    if f_name is None:
+      self.functions_names.append(str(new_fun))
+    else:
+      self.functions_names.append(f_name)
 
     if color is None:
        self.colors.append(self.DefaultColor)
@@ -337,14 +341,18 @@ class graph_funs:
     # self.domains.append(new_domain)
     return new_funs, new_domains 
 
-  def add_hor_dilation(self, f, domain, x_scale, color=None):
+  def add_hor_dilation(self, f, domain, x_scale, f_name=None, color=None):
     """ adds horizontal dilations to functions list.
     """ 
     x = sp.symbols('x')
     
     new_fun = f.subs(x, x_scale*x)
     self.functions_list.append(new_fun)
-    self.functions_names.append(str(new_fun))
+    
+    if f_name is None:
+      self.functions_names.append(str(new_fun))
+    else:
+      self.functions_names.append(f_name)
 
     if color is None:
        self.colors.append(self.DefaultColor)
